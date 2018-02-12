@@ -39,15 +39,15 @@
 	<profiles>
 		<profile>
 			<id>auth</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<login.class>io.openshift.qa.LoginUsers</login.class>
 			</properties>
 		</profile>
 		<profile>
 			<id>oauth2</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<login.class>io.openshift.qa.LoginUsersOauth2</login.class>
 			</properties>
