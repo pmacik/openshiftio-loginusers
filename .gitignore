@@ -2,3 +2,8 @@
 *.iml
 target
 *.tokens
+
+*.classpath
+*.project
+*.settings
+*.vscode
