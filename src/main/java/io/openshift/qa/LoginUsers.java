@@ -58,6 +58,9 @@ public class LoginUsers {
 
       private static final long maxUsers = Long.valueOf(System.getProperty("max.users", "-1"));
 
+      final static boolean userTokensIncludeUsername = Boolean.valueOf(System.getProperty("user.tokens.include.username", "false"));
+      final static String userTokensFile = System.getProperty("user.tokens.file", "user.tokens");
+
       public static void main(String[] args) throws Exception {
             HashMap<Metric, LinkedList<Long>> metricMap = new HashMap<>();
             for (Metric m : Metric.values()) {
@@ -118,7 +121,11 @@ public class LoginUsers {
                   final JSONObject json = new JSONObject(tokenJson);
                   synchronized (tokens) {
                         tokens.append(json.getString("access_token")).append(";")
-                                    .append(json.getString("refresh_token")).append("\n");
+                                .append(json.getString("refresh_token"));
+                        if(userTokensIncludeUsername){
+                              tokens.append(";").append(uName);
+                        }
+                        tokens.append("\n");
                   }
                   metricMap.get(Metric.OpenLoginPage).add(openLoginPage);
                   metricMap.get(Metric.Login).add(login);
@@ -133,8 +140,7 @@ public class LoginUsers {
                   log.info(metric.logName() + "-time-stats:count=" + size + ";min=" + list.getFirst() + ";med="
                               + list.get(size / 2) + ";max=" + list.getLast());
             }
-            final FileWriter fw = new FileWriter(new File(System.getProperty("user.tokens.file", "user.tokens")),
-                        false);
+            final FileWriter fw = new FileWriter(new File(userTokensFile), false);
             fw.append(tokens.toString());
             fw.close();
             System.exit(0);

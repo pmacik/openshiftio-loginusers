@@ -66,6 +66,12 @@ public class LoginUsersOauth2 {
 
       private static final long maxUsers = Long.valueOf(System.getProperty("max.users", "-1"));
 
+      final static String baseUrl = System.getProperty("auth.server.address");
+      final static String clientId = System.getProperty("auth.client.id", "740650a2-9c44-4db5-b067-a3d1b2cd2d01");
+      final static String redirectUrl = baseUrl + "/api/status";
+      final static boolean userTokensIncludeUsername = Boolean.valueOf(System.getProperty("user.tokens.include.username", "false"));
+      final static String userTokensFile = System.getProperty("user.tokens.file", "user.tokens");
+
       public static void main(String[] args) throws Exception {
             HashMap<MetricAuth, LinkedList<Long>> metricMap = new HashMap<>();
             for (MetricAuth m : MetricAuth.values()) {
@@ -74,10 +80,6 @@ public class LoginUsersOauth2 {
             final StringBuffer tokens = new StringBuffer();
 
             Properties usersProperties = new Properties();
-
-            final String baseUrl = System.getProperty("auth.server.address");
-            final String clientId = System.getProperty("auth.client.id", "740650a2-9c44-4db5-b067-a3d1b2cd2d01");
-            final String redirectUrl = baseUrl + "/api/status";
 
             usersProperties
                         .load(new InputStreamReader(LoginUsersOauth2.class.getResourceAsStream("/users.properties")));
@@ -165,7 +167,11 @@ public class LoginUsersOauth2 {
                   final JSONObject json = new JSONObject(responseString);
                   synchronized (tokens) {
                         tokens.append(json.getString("access_token")).append(";")
-                                    .append(json.getString("refresh_token")).append("\n");
+                                    .append(json.getString("refresh_token"));
+                        if(userTokensIncludeUsername){
+                              tokens.append(";").append(uName);
+                        }
+                        tokens.append("\n");
                   }
                   log.info(uName + "-" + MetricAuth.GetToken.logName() + ":" + getToken + "ms");
                   final long login = getCode + getToken;
@@ -187,8 +193,7 @@ public class LoginUsersOauth2 {
                   log.info(metric.logName() + "-time-stats:count=" + size + ";min=" + list.getFirst() + ";med="
                               + list.get(size / 2) + ";max=" + list.getLast());
             }
-            final FileWriter fw = new FileWriter(new File(System.getProperty("user.tokens.file", "user.tokens")),
-                        false);
+            final FileWriter fw = new FileWriter(new File(userTokensFile),false);
             fw.append(tokens.toString());
             fw.close();
             System.exit(0);
