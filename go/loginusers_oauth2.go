@@ -20,7 +20,11 @@ func main() {
 	authServerAddress := getenv("AUTH_SERVER_ADDRESS", "http://localhost:8089")
 
 	usersPropertiesFile := getenv("USERS_PROPERTIES_FILE", "users.properties")
+
 	userTokensFile := getenv("USER_TOKENS_FILE", "user.tokens")
+	userTokensIncludeUsername := strings.ToLower(getenv("USER_TOKENS_INCLUDE_USERNAME", "false")) == "true"
+
+	maxUsers := getenv("MAX_USERS", "-1")
 
 	log.SetOutput(os.Stdout)
 
@@ -55,11 +59,21 @@ func main() {
 
 	w := bufio.NewWriter(tfile)
 	defer w.Flush()
-	for index, usernName := range userNames {
-		log.Printf("Loggin user %s in", usernName)
-		tokens, err := LoginUsersOAuth2(authServerAddress, usernName, userPasswords[index])
+	for index, userName := range userNames {
+		maxUsersCount, err := strconv.Atoi(maxUsers)
 		checkErr(err)
-		_, err = w.WriteString(fmt.Sprintf("%s;%s\n", tokens.AccessToken, tokens.RefreshToken))
+		if maxUsersCount > 0 && index >= maxUsersCount {
+			break
+		}
+		log.Printf("Loggin user %s in", userName)
+		tokens, err := LoginUsersOAuth2(authServerAddress, userName, userPasswords[index])
+		checkErr(err)
+		tokenLine := fmt.Sprintf("%s;%s", tokens.AccessToken, tokens.RefreshToken)
+		if userTokensIncludeUsername {
+			tokenLine = fmt.Sprintf("%s;%s", tokenLine, userName)
+		}
+
+		_, err = w.WriteString(fmt.Sprintf("%s\n", tokenLine))
 		checkErr(err)
 	}
 	//write tokens to user.tokens file
