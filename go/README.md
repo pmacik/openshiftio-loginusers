@@ -23,7 +23,7 @@ go run loginusers_oauth2.go
 
 Configuration via environment variables:
 
-* `AUTH_SERVER_ADDRESS` = server of Auth Services (default `https://auth.openshift.io`).
+* `AUTH_SERVER_ADDRESS` = server of Auth Services (default `https://localhost:8089`).
 * `AUTH_CLIENT_ID` = client id (default `740650a2-9c44-4db5-b067-a3d1b2cd2d01`).
 * `USERS_PROPERTIES_FILE` = a file containing a line separated list of users in a form of `user=password` (default `users.properties`).
 * `USER_TOKENS_FILE` = an output file where the generated auth and refresh tokens were written after succesfull login of each user (default `user.tokens`).
